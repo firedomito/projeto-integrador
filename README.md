@@ -23,217 +23,217 @@ O Projeto Integrador consiste em um Sistema de Controle de Estacionamento Rotati
     * Relatório de Empresas e Estacionamentos, incluindo as seguintes informações: id da Empresa, id do Estacionamento.<br>
 
 ### 4.TABELA DE DADOS DO SISTEMA
-  <p><a href="/arquivos/tabela_dados_sistema.pdf">Tabela de dados</a></p>
+  <p><a href="/DB/tabela_dados_sistema.pdf">Tabela de dados</a></p>
 
 ### 5.PMC
-  <p><img src="/arquivos/PMC-v.1.1.png" alt="Project Model Canvas"></p>
+  <p><img src="/arquivos/imagens/PMC-v2.0.png" alt="Project Model Canvas"></p>
 
 ### 6.MODELO CONCEITUAL
-  <p><img src="/arquivos/modelo_conceitual.png" alt="Modelo conceitual"></p>
+  <p><img src="/DB/modelo_conceitual.png" alt="Modelo conceitual"></p>
 
 ### 7.MODELO LÓGICO
-  <p><img src="/arquivos/modelo_logico.png" alt="Modelo lógico"></p>
+  <p><img src="/DB/modelo-logico.png" alt="Modelo lógico"></p>
 
 ### 8.MODELO FÍSICO
-  <p>
-  
-      DROP TABLE IF EXISTS Aloca;
-      CREATE TABLE Aloca (
-          idAloca int PRIMARY KEY,
-          dscPlaca varchar(12),
-          hr_entrada TIMESTAMP,
-          hr_saidaPrevista TIMESTAMP,
-          hr_saidaEfetiva TIMESTAMP,
-          idEmpresa int,
-          codVaga int
-      );
+  [Código BD](DB/BD_code.sql)
 
-      DROP TABLE IF EXISTS VAGA;
-      CREATE TABLE VAGA (
-          codVaga int PRIMARY KEY,
-          condVaga bool,
-          idEstac int
-      );
+  '''
+      DROP TABLE IF EXISTS
+      aloca,
+      vaga,
+      endereco,
+        imagem,
+      estacionamento,
+      empresa;
+        
+    -- -----------------------------------------------------
+    -- Table imagem
+    -- -----------------------------------------------------
+    CREATE table imagem (
+      idImg INT NOT NULL AUTO_INCREMENT,
+      nome VARCHAR(45) NULL,
+      dataImg DATETIME NULL,
+      idEmpresa INT NOT NULL,
+      PRIMARY KEY (idImg),
+      INDEX fk_imagem_empresa1_idx (idEmpresa ASC) VISIBLE,
+      CONSTRAINT fk_imagem_empresa1
+        FOREIGN KEY (idEmpresa)
+        REFERENCES empresa (idEmpresa)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION)
+    ENGINE = InnoDB;
+    -- -----------------------------------------------------
+    -- Table empresa
+    -- -----------------------------------------------------
 
-      DROP TABLE IF EXISTS ENDERECO;
-      CREATE TABLE ENDERECO (
-          idEnd int PRIMARY KEY,
-          dscLogradouro varchar(45),
-          numero int,
-          cep varchar(20),
-          idEstac int,
-          idBairro int
-      );
-      DROP TABLE IF EXISTS BAIRRO;
-      CREATE TABLE BAIRRO (
-          idBairro int PRIMARY KEY,
-          nomBairro varchar(45)
-      );
-
-      DROP TABLE IF EXISTS ESTACIONAMENTO;
-      CREATE TABLE ESTACIONAMENTO (
-          idEstac int PRIMARY KEY,
-          nomEstac varchar(45),
-          qtdVagas int,
-          idEmpresa int
-      );
+    CREATE TABLE empresa (
+      idEmpresa INT NOT NULL AUTO_INCREMENT,
+      nomEmpresa VARCHAR(45) NOT NULL,
+      dscCpfCnpj VARCHAR(45) NULL,
+      email VARCHAR(45) NULL,
+      telefone VARCHAR(25) NULL,
+      senha VARCHAR(255) NOT NULL,
+      PRIMARY KEY (idEmpresa))
+    ENGINE = InnoDB;
 
 
-      DROP TABLE IF EXISTS EMPRESA;
-      CREATE TABLE EMPRESA (
-          idEmpresa int PRIMARY KEY,
-          nomEmpresa varchar(45),
-          dscCpfCnpj varchar(45),
-          Email varchar(45),
-          Senha varchar(45)
-      );
+    -- -----------------------------------------------------
+    -- Table endereco
+    -- -----------------------------------------------------
+
+    CREATE TABLE endereco (
+      idEnd INT NOT NULL AUTO_INCREMENT,
+      dscLogradouro VARCHAR(45) NULL,
+      numero INT NULL,
+      cep VARCHAR(45) NOT NULL,
+      bairro VARCHAR(45) NULL,
+      cidade VARCHAR(45) NULL,
+      estado VARCHAR(45) NULL,
+      idEstac INT NOT NULL,
+      PRIMARY KEY (idEnd),
+      INDEX fk_endereco_estacionamento1_idx (idEstac ASC) VISIBLE,
+      CONSTRAINT fk_endereco_estacionamento1
+        FOREIGN KEY (idEstac)
+        REFERENCES estacionamento (idEstac)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION)
+    ENGINE = InnoDB;
 
 
-      ALTER TABLE ESTACIONAMENTO ADD CONSTRAINT FK_ESTACIONAMENTO_2
-          FOREIGN KEY (idEmpresa)
-          REFERENCES EMPRESA (idEmpresa)
-          ON DELETE RESTRICT;
+    -- -----------------------------------------------------
+    -- Table estacionamento
+    -- -----------------------------------------------------
 
-      ALTER TABLE ENDERECO ADD CONSTRAINT FK_ENDERECO_2
-          FOREIGN KEY (idEstac)
-          REFERENCES ESTACIONAMENTO (idEstac)
-          ON DELETE RESTRICT;
+    CREATE TABLE estacionamento (
+      idEstac INT NOT NULL AUTO_INCREMENT,
+      nomEstac VARCHAR(45) NOT NULL,
+      qtdVagas INT NOT NULL,
+      valFixo DOUBLE NOT NULL,
+      valAcresc DOUBLE NULL,
+      idEmpresa INT NOT NULL,
+      PRIMARY KEY (idEstac),
+      INDEX fk_estacionamento_empresa_idx (idEmpresa ASC) VISIBLE,
+      CONSTRAINT fk_estacionamento_empresa
+        FOREIGN KEY (idEmpresa)
+        REFERENCES empresa (idEmpresa)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION)
+    ENGINE = InnoDB;
 
-      ALTER TABLE ENDERECO ADD CONSTRAINT FK_ENDERECO_3
-          FOREIGN KEY (idBairro)
-          REFERENCES BAIRRO (idBairro)
-          ON DELETE RESTRICT;
 
-      ALTER TABLE VAGA ADD CONSTRAINT FK_VAGA_2
-          FOREIGN KEY (idEstac)
-          REFERENCES ESTACIONAMENTO (idEstac)
-          ON DELETE RESTRICT;
+    -- -----------------------------------------------------
+    -- Table vaga
+    -- -----------------------------------------------------
 
-      ALTER TABLE Aloca ADD CONSTRAINT FK_Aloca_2
-          FOREIGN KEY (idEmpresa)
-          REFERENCES EMPRESA (idEmpresa)
-          ON DELETE SET NULL;
+    CREATE TABLE vaga (
+      idVaga INT NOT NULL AUTO_INCREMENT,
+      condVaga TINYINT NULL,
+      idEstac INT NOT NULL,
+      PRIMARY KEY (idVaga),
+      INDEX fk_vaga_estacionamento1_idx (idEstac ASC) VISIBLE,
+      CONSTRAINT fk_vaga_estacionamento1
+        FOREIGN KEY (idEstac)
+        REFERENCES estacionamento (idEstac)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION)
+    ENGINE = InnoDB;
 
-      ALTER TABLE Aloca ADD CONSTRAINT FK_Aloca_3
-          FOREIGN KEY (codVaga)
-          REFERENCES VAGA (codVaga)
-          ON DELETE SET NULL;
-  </p>
+
+    -- -----------------------------------------------------
+    -- Table aloca
+    -- -----------------------------------------------------
+
+    CREATE TABLE aloca (
+      idAloca INT NOT NULL AUTO_INCREMENT,
+      idVaga INT NOT NULL,
+      nomCliente VARCHAR(45) NULL,
+      cpfCliente VARCHAR(45) NULL,
+      hrEntrada TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      hrSaida TIMESTAMP NULL,
+      valTotal DOUBLE NULL,
+      dscPlaca VARCHAR(25) NULL,
+      INDEX fk_pessoa_has_vaga_vaga1_idx (idVaga ASC) VISIBLE,
+      PRIMARY KEY (idAloca),
+      CONSTRAINT fk_pessoa_has_vaga_vaga1
+        FOREIGN KEY (idVaga)
+        REFERENCES vaga (idVaga)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION)
+    ENGINE = InnoDB;
+
+
+
+    
+    '''
 
 ### 9.INSERT APLICADO NAS TABELAS DO BANCO DE DADOS
-  <p>
   
-    INSERT INTO Empresa
-    VALUES (1, 'Vix Park', '04.236.475/0001-32', 'vixpark@gmail.com', 'esYSXMdYyzQH'),
-            (2, 'InstaPark','34.353.384/0001-48', 'instaEmpresa@gmail.com', 'YkKjfxThEwDf'),
-            (3, 'Parky Estacionamentos','229.802.280-10', 'parky.estacionamentos@hotmail.com', 'kqfcvGATSESk'),
-            (4, 'Estacioney','586.685.070-28', 'neyestacionamentos@outlook.com', 'rYbCNgNBUfvd');
+  '''
+  INSERT INTO imagem (nome, dataImg, idEmpresa) VALUES ('00beb17e71130576fc17486ae1981b8a', '2022-01-20 13:22:46', 1);
 
-    INSERT INTO Estacionamento
-    VALUES (1, 'Vixpark Estacionamento', 4, 1),
-          (2, 'Instapark', 4, 2),
-          (3, 'Parky Estacionamento', 5, 3),
-          (4, 'Estacioney', 5, 4),
-          (5, 'RotaPark', 4, 4);
 
-    INSERT INTO VAGA
-    VALUES (1,	'0',	1),
-    (2,	'1',	1),
-    (3,	'0',	1),
-    (4,	'1',	1),
-    (5,	'0',	2),
-    (6,	'0',	2),
-    (7,	'1',	2),
-    (8,	'1',	2),
-    (9,	'0',	3),
-    (10,	'0',	3),
-    (11, '1',	3),
-    (12,	'0',	3),
-    (13,	'0',	3),
-    (14,	'1', 4),
-    (15,	'1',	4),
-    (16,	'1',	4),
-    (17,	'1',	4),
-    (18,	'1',	4),
-    (19,	'0',	5),
-    (20,	'0',	5),
-    (21,	'1',	5),
-    (22,	'0',	5);
+    -- -----------------------------------------------------
+    -- Data for table empresa
+    -- -----------------------------------------------------
+    INSERT INTO empresa (nomEmpresa, dscCpfCnpj, email, telefone, senha) VALUES ('Empresa de Teste', '12345678966', 'teste@empresa.com', '2793658329', '$2y$10$VJVFrXnbIt1SyD2Ht8UY1O1Evywx4Sp/cJ/9stJV6ntqYjQio9yaC');
 
-    INSERT INTO ALOCA
-    VALUES (1,	'HSF0850',	'2021-07-09 12:02:09',	'2021-07-09 15:02:09',	'2021-07-09 15:02:09',	1,	1),
-    (2,	'NFB8592',	'2021-07-09 10:26:37',	'2021-07-09 11:26:37',	'2021-07-09 11:26:37',	1,	2),
-    (3,	'JQN7059',	'2021-07-09 06:12:22',	'2021-07-09 10:12:22',	'2021-07-09 10:12:22',	1,	3),
-    (4,	'MUR6823',	'2021-07-08 09:02:00',	'2021-07-08 11:02:00',	'2021-07-08 11:02:00',	1,	4),
-    (5,	'NFA2145',	'2021-07-08 13:02:00',	'2021-07-09 14:02:00',	'2021-07-09 14:02:00',	2,	8),
-    (6,	'MXO9426',	'2021-06-18 08:25:28',	'2021-06-18 10:25:28',	'2021-06-18 10:25:28',	2,	5),
-    (7,	'NET6883',	'2021-06-21 12:07:11',	'2021-06-21 14:00:00',	'2021-06-21 14:00:00',	2,	7),
-    (8,	'NET6883',	'2021-01-12 11:25:38',	'2021-01-12 14:25:38',	'2021-01-12 14:25:38',	2,	6),
-    (9,	'KBX2087',	'2021-07-22 10:55:36',	'2021-07-22 11:55:36',	'2021-07-22 11:55:36',	3,	13),
-    (10, 'MUO6663',	'2020-12-28 10:11:18',	'2020-12-28 11:11:18',	'2020-12-28 11:11:18',	3,	10),
-    (11, 'MWV1941',	'2021-07-15 08:58:46',	'2021-07-15 13:58:46',	'2021-07-15 13:58:46',	3,	11),
-    (12, 'KPQ7466',	'2021-09-01 11:49:13',	'2021-09-01 14:49:13',	'2021-09-01 14:49:13',	3,	12),
-    (13, 'HWA3740',	'2021-06-10 12:47:39',	'2021-06-10 15:47:00',	'2021-06-10 15:47:00',	3,	9),
-    (14, 'MFV9264',	'2021-01-06 08:17:24',	'2021-01-06 18:17:00',	'2021-01-06 18:17:00',	4,	22),
-    (15, 'LWL3427',	'2021-04-13 12:51:12',	'2021-04-13 13:51:12',	'2021-04-13 13:51:12',	4,	18),
-    (16, 'MXC5240',	'2021-05-26 11:46:08',	'2021-05-26 13:46:08',	'2021-05-27 13:46:08',	4,	17),
-    (17, 'MNB3961',	'2021-07-07 10:46:45',	'2021-07-07 18:46:45',	'2021-07-08 17:46:45',	4,	15),
-    (18, 'KBW6061',	'2020-09-15 07:40:00',	'2020-09-15 08:40:00',	'2020-09-15 08:40:00',	4,	14),
-    (19, 'MUD8981',	'2020-09-29 11:24:53',	'2020-09-29 15:24:53',	'2020-09-29 15:24:53',	4,	21),
-    (20, 'HTV5237',	'2021-07-08 07:00:09',	'2021-07-08 09:00:09',	'2021-07-08 09:00:09',	4,	19),
-    (21, 'MWW1974',	'2021-08-20 12:35:47',	'2021-08-20 15:35:47',	'2021-08-21 15:35:47',	4,	20),
-    (22, 'HZQ1381',	'2021-01-20 09:09:09',	'2021-01-20 10:09:09',	'2021-01-20 10:09:09',	4,	16),
-    (23, 'NEO5813',	'2020-11-05 10:05:28',	'2020-11-05 11:05:28',	'2020-11-06 11:05:28',	1,	3),
-    (24, 'MXM9004',	'2021-04-06 12:52:04',	'2021-04-06 15:52:04',	'2021-04-06 15:52:04',	2,	5),
-    (25, 'NEB0273',	'2021-01-14 10:08:51',	'2021-01-14 15:10:00',	'2021-01-14 15:10:00',	2,	7),
-    (26, 'HRJ7052',	'2021-07-15 11:09:52',	'2021-07-15 13:09:52',	'2021-07-15 13:09:52',	3,	10),
-    (27, 'MRJ0845',	'2020-12-27 11:11:37',	'2020-12-27 16:11:37',	'2020-12-27 16:11:37',	3,	13),
-    (28, 'NBW8056',	'2020-08-23 11:38:03',	'2020-08-23 16:38:03',	'2020-08-23 16:38:03',	2,	8),
-    (29, 'HWT2078',	'2020-09-24 08:18:31',	'2020-09-24 10:18:31',	'2020-09-25 10:18:31',	1,	2),
-    (30, 'KLQ2773',	'2021-01-23 10:46:06',	'2021-01-23 15:46:06',	'2021-01-24 15:46:06',	2,	5);
 
-    INSERT INTO Bairro
-    VALUES (1, 'Jardim da Penha'),
-            (2, 'São Pedro'),
-            (3, 'Ilha das Caieiras'),
-            (4, 'Jardim Camburi'),
-            (5, 'Praia do Canto');
 
-    INSERT INTO ENDERECO
-    VALUES (1,	'Rua Orácio Cândido dos Santos',	540,	'29047-035',	1,	1),
-    (2,	'Travessa Canindé',	345,	'29030-065',	2,	2),
-    (3,	'Rua Vista Linda',	781,	'29032-106',	3,	3),
-    (4,	'Rua Lucidato Vieira Falcão',	201,	'29027-160',	4,	4),
-    (5,	'Travessa do Tabual',	321,	'29050-227',	5,	5);
-    
-    UPDATE endereco SET idbairro = 1 WHERE idestac = 5;
-</p>
 
-### 10.TABELAS E PRINCIPAIS CONSULTAS
+    -- -----------------------------------------------------
+    -- Data for table endereco
+    -- -----------------------------------------------------
+    INSERT INTO endereco (idEnd, dscLogradouro, numero, cep, bairro, cidade, estado, idEstac) VALUES (1, 'Rua Alceu Valença', '63', '29174938', 'São Vincente', 'Serra', 'ES', 1)
+
+
+
+    -- -----------------------------------------------------
+    -- Data for table estacionamento
+    -- -----------------------------------------------------
+    INSERT INTO estacionamento (idEstac, nomEstac, qtdVagas, valFixo, valAcresc, idEmpresa) VALUES (1, 'Teste', 30, 5, 2.5, 1);
+
+
+
+    -- -----------------------------------------------------
+    -- Data for table vaga
+    -- -----------------------------------------------------
+
+    INSERT INTO vaga (idVaga, condVaga, idEstac) VALUES (1, 1, 1), (2, 1, 1), (3, 0, 1), (4, 0, 1);
+
+
+    -- -----------------------------------------------------
+    -- Data for table aloca
+    -- -----------------------------------------------------
+    INSERT INTO aloca (idPessoa, idVaga, idAloca, nomCliente, cpfCliente, hrEntrada, hrSaida, valTotal, dscPlaca) VALUES (1, 1, 1, 'Josefina Chaves', '123.456.789-44', '2022-01-19 16:51:57', NULL, NULL, 'dfj4839'),
+    (2, 2, 2, 'Augusto Gonçalo', '743.753.347-42', '2022-01-19 16:51:57', NULL, NULL, 'abc1234');
+  '''
+
+
+### 10.TABELAS E PRINCIPAIS CONSULTAS (desatualizado)
   #### 10.1 CONSULTAS DAS TABELAS COM TODOS OS DADOS INSERIDOS
       SELECT * FROM empresa;
-<p><img src="/arquivos/SELECTS/empresa.PNG" alt="Select empresa"></p>
+<p><img src="/arquivos/imagens/selects/empresa.PNG" alt="Select empresa"></p>
 
       SELECT * FROM estacionamento;
-<p><img src="/arquivos/SELECTS/estacionamento.PNG" alt="Select estacionamento"></p>
+<p><img src="/arquivos/imagens/selects/estacionamento.PNG" alt="Select estacionamento"></p>
 
       SELECT * FROM bairro;
- <p><img src="/arquivos/SELECTS/bairro.PNG" alt="Select bairro"></p>     
+ <p><img src="/arquivos/imagens/selects/bairro.PNG" alt="Select bairro"></p>     
  
       SELECT * FROM vaga;
-<p><img src="/arquivos/SELECTS/vagas.PNG" alt="Select vagas"></p>
+<p><img src="/arquivos/imagens/selects/vagas.PNG" alt="Select vagas"></p>
 
       SELECT * FROM endereco;
-<p><img src="/arquivos/SELECTS/endereco.png" alt="Select endereco"></p>
+<p><img src="/arquivos/imagens/selects/endereco.png" alt="Select endereco"></p>
 
       SELECT * FROM aloca
-<p><img src="/arquivos/SELECTS/aloca.png" alt="Select vagasHistórico"></p>      
+<p><img src="/arquivos/imagens/selects/aloca.png" alt="Select vagasHistórico"></p>      
 
   #### 10.2 PRINCIPAIS CONSULTAS DO SISTEMA
   ##### 1) Relatório com a quantidade de horas que os veículos estacionaram em um dia específico.<br>
       SELECT dscplaca, extract(hour from hr_saidaEfetiva - hr_entrada) as "TempoEstacionado" FROM aloca WHERE date(hr_Entrada) = '2021-07-09';
       
-<p><img src="/arquivos/1.PNG" alt="Relatório 1"></p>
+<p><img src="/arquivos/imagens/consultas/1.PNG" alt="Relatório 1"></p>
       
  ##### 2) Relatorio com o nome do estacionamento e quantidade de vagas.<br>
  
@@ -243,7 +243,7 @@ O Projeto Integrador consiste em um Sistema de Controle de Estacionamento Rotati
 
 
       
-<p><img src="/arquivos/2.PNG" alt="Relatório 2"></p>
+<p><img src="/arquivos/imagens/consultas/2.PNG" alt="Relatório 2"></p>
       
  ##### 3) Relatório com as vagas ocupadas no mês 7;<br>
  
@@ -251,33 +251,32 @@ O Projeto Integrador consiste em um Sistema de Controle de Estacionamento Rotati
       SELECT dscplaca, extract(hour from hr_saidaefetiva - hr_entrada) as "Tempo" FROM aloca WHERE EXTRACT(MONTH FROM hr_entrada) = 7 order by "Tempo";
 
 
-<p><img src="/arquivos/3.PNG" alt="Relatório 3"></p>
+<p><img src="/arquivos/imagens/consultas/3.PNG" alt="Relatório 3"></p>
      
 ##### 4) Relatório que informe a quantidade de estacionamentos por bairro.<br>
 
       SELECT brr.nomBairro, COUNT(*) as "Qtd estacionamento / bairro" FROM Endereco ende INNER JOIN Bairro brr on (ende.idbairro = brr.idbairro) GROUP BY brr.nomBairro;
-<p><img src="/arquivos/4.PNG" alt="Relatório 4"></p>
+<p><img src="/arquivos/imagens/consultas/4.PNG" alt="Relatório 4"></p>
     
 ##### 5) Relatório de Empresas e Estacionamentos, incluindo as seguintes informações: nome do estacionamento, id da empresa.<br>
 
-      SELECT emp.nomempresa, count(*) as "qtdEstacionamento" FROM estacionamento est inner join empresa emp on (est.fk_empresa_idempresa = emp.idempresa) group by emp.idempresa;
-<p><img src="/arquivos/5.PNG" alt="Relatório 5"></p>  
+        SELECT emp.nomempresa, count(*) as "qtdEstacionamento" FROM estacionamento est inner join empresa emp on (est.idempresa = emp.idempresa) group by emp.idempresa;
+<p><img src="/arquivos/imagens/consultas/5.PNG" alt="Relatório 5"></p>  
       
-### 11.Gráficos, relatórios, integração com Linguagem de programação e outras solicitações
+### 11.Gráficos, relatórios, integração com Linguagem de programação e outras solicitações (desatualizados)
 #### 11.1 Integração com Linguagem de Programação;
 <p><img src="/arquivos/conexao_postgres.PNG" alt="Conexão com o postgres"></p>
 
 #### 11.2 Desenvolvimento de gráficos/relatórios pertinentes, juntamente com demais;
-<p><img src="/arquivos/relatorio1.PNG" alt="Relatório 1"></p>
-<p><img src="/arquivos/relatorio2.PNG" alt="Relatório 2"></p>
-<p><img src="/arquivos/relatorio3.PNG" alt="Relatório 3"></p>
-<p><img src="/arquivos/relatorio4.PNG" alt="Relatório 4"></p>
-<p><img src="/arquivos/relatorio5.PNG" alt="Relatório 5"></p>
+<p><img src="/arquivos/imagens/graficos_relatorios/relatorio1.PNG" alt="Relatório 1"></p>
+<p><img src="/arquivos/imagens/graficos_relatorios/relatorio2.PNG" alt="Relatório 2"></p>
+<p><img src="/arquivos/imagens/graficos_relatorios/relatorio3.PNG" alt="Relatório 3"></p>
+<p><img src="/arquivos/imagens/graficos_relatorios/relatorio4.PNG" alt="Relatório 4"></p>
+<p><img src="/arquivos/imagens/graficos_relatorios/relatorio5.PNG" alt="Relatório 5"></p>
 
 ### 12.Slides e Apresentação em vídeo.
 #### 12.1 Slides;
 https://docs.google.com/presentation/d/1b_0QjegHWRP4IcaemKGxc9DQ9KeSATGLhsF4ZXBTasA/edit?usp=sharing 
 
 #### 12.2 Apresentação em vídeo;
-https://youtu.be/j4KEmgnTlzA
-
+https://youtu.be/W0MX4GAFrdY
